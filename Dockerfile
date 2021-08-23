@@ -10,7 +10,7 @@ ENV ANDROID_SDK       ${ANDROID_HOME}
 ENV PATH "${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin"
 ENV PATH "${PATH}:${ANDROID_HOME}/cmdline-tools/tools/bin"
 ENV PATH "${PATH}:${ANDROID_HOME}/tools/bin"
-ENV PATH "${PATH}:${ANDROID_HOME}/build-tools/30.0.2"
+ENV PATH "${PATH}:${ANDROID_HOME}/build-tools/31.0.0"
 ENV PATH "${PATH}:${ANDROID_HOME}/platform-tools"
 ENV PATH "${PATH}:${ANDROID_HOME}/emulator"
 ENV PATH "${PATH}:${ANDROID_HOME}/bin"
@@ -30,9 +30,16 @@ WORKDIR /opt/android-sdk-linux
 RUN /opt/tools/entrypoint.sh built-in
 
 RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "cmdline-tools;latest"
-RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "build-tools;30.0.2"
+RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "build-tools;31.0.0"
 RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "platform-tools"
-RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "platforms;android-30"
-RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "system-images;android-30;google_apis;x86_64"
+RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "platforms;android-31"
+RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "system-images;android-31;google_apis;x86_64"
+
+# Disable Gradle daemon, since we are running on a CI server.
+RUN mkdir ${HOME}/.gradle \
+  && echo "org.gradle.daemon=false" > ${HOME}/.gradle/gradle.properties
+
+RUN echo y | sdkmanager "system-images;android-31;google_apis;x86_64" \
+  && echo "no" | avdmanager create avd -n default_avd --abi google_apis/x86_64 -k "system-images;android-31;google_apis;x86_64"
 
 CMD /opt/tools/entrypoint.sh built-in
