@@ -8,7 +8,6 @@ ENV ANDROID_SDK_ROOT  ${ANDROID_HOME}
 ENV ANDROID_SDK       ${ANDROID_HOME}
 
 ENV PATH "${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin"
-ENV PATH "${PATH}:${ANDROID_HOME}/cmdline-tools/tools/bin"
 ENV PATH "${PATH}:${ANDROID_HOME}/tools/bin"
 ENV PATH "${PATH}:${ANDROID_HOME}/build-tools/31.0.0"
 ENV PATH "${PATH}:${ANDROID_HOME}/platform-tools"
@@ -29,11 +28,14 @@ WORKDIR /opt/android-sdk-linux
 
 RUN /opt/tools/entrypoint.sh built-in
 
-RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "cmdline-tools;latest"
-RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "build-tools;31.0.0"
-RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "platform-tools"
-RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "platforms;android-31"
-RUN /opt/android-sdk-linux/cmdline-tools/tools/bin/sdkmanager "system-images;android-31;google_apis;x86_64"
+RUN /opt/android-sdk-linux/cmdline-tools/tools-tmp/bin/sdkmanager "cmdline-tools;latest"
+RUN rm -rf /opt/android-sdk-linux/cmdline-tools/tools-tmp
+RUN sdkmanager "build-tools;31.0.0"
+RUN sdkmanager "platform-tools"
+RUN sdkmanager "platforms;android-31"
+RUN sdkmanager "system-images;android-31;google_apis;x86_64"
+RUN sdkmanager "emulator"
+RUN sdkmanager --update
 
 # Disable Gradle daemon, since we are running on a CI server.
 RUN mkdir ${HOME}/.gradle \
